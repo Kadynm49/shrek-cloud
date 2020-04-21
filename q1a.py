@@ -3,6 +3,11 @@ import unicodedata
 from contractions import CONTRACTION_MAP
 import nltk
 from nltk.corpus import stopwords
+import numpy as np
+from wordcloud import WordCloud
+from wordcloud import ImageColorGenerator
+from PIL import Image
+import matplotlib.pyplot as plt
 
 # final_data taken from:  
 # https://shrek.fandom.com/wiki/Shrek_(film)/Transcript
@@ -52,4 +57,21 @@ def expand_contractions(text, contraction_mapping=CONTRACTION_MAP):
     expanded_text = re.sub("'", "", expanded_text)
     return expanded_text
 
-print(get_char_lines('fiona')[100])
+
+char_mask = np.array(Image.open("images/shrek3.png"))    
+image_colors = ImageColorGenerator(char_mask)
+
+character = 'shrek'
+text = ""
+
+words = get_char_lines(character)
+for ele in words:  
+    text += ele      
+
+
+wc = WordCloud(background_color="white", max_words=200, width=400, height=400, mask=char_mask, random_state=1).generate(text)
+# to recolour the image
+plt.imshow(wc.recolor(color_func=image_colors))
+plt.axis("off")
+plt.axis("off")
+plt.show()
