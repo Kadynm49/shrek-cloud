@@ -1,5 +1,3 @@
-
-
 def distance(target, source, insertcost, deletecost, replacecost):
     n = len(target)+1
     m = len(source)+1
@@ -26,70 +24,77 @@ def distance(target, source, insertcost, deletecost, replacecost):
                 
             dist[i][j] = min(inscost, delcost, substcost)
             
-            if (dist[i][j] == inscost):
-                instr[i][j] = 'i'
+            if (dist[i][j] == substcost):
+                instr[i][j] = 's'
             elif (dist[i][j] == delcost):
                 instr[i][j] = 'd'
             else:
-                instr[i][j] = 's'
+                instr[i][j] = 'i'
             
             
-    visualize(target, source, dist, instr)
-            
+    alignment, count = visualize(target, source, dist, instr)
+    
     # return min edit distance
-    return dist[n-1][m-1]
-
-
+    return dist[n-1][m-1], alignment, count
 
 def visualize(target, source, dist, instr):
-    top, bot, mid = 0, 1, 2    
-    arr = [ [" " for j in range(max(len(target), len(source)))] for i in range(3) ]
-    
-    print(len(arr[top]))
-    # print(arr)
-    # for i in range(len(target)):
-    #     arr[top][i] = target[i]
-        
-    # for i in range(len(source))
-    #     arr[bot][i] = source[i]
-    
-    i = len(target) -1
-    j = len(source) -1 
-    
-    t = len(arr[top]) -1 
-    while (t >= 0):
+    top, mid, bot = 0, 1, 2    
+    arr = [ [" " for j in range(max(len(target), len(source)) * 2)] for i in range(3) ]
+
+    i = len(target)
+    j = len(source)
+    count = 0
+    t = (max(len(target), len(source))*2) - 1
+    while ((i!=0 and j!=-1) or (i!=-1 and j!=0)):
         inst = instr[i][j]
-        
-        if (inst == 'i'):
-            # insertion - go left
-            print(target[i])
-            print(arr[top][t])
-            arr[top][t] = target[i]
+        if (j == 0):
+            arr[top][t] = target[i-1]
             arr[bot][t] = "_"
             i = i - 1
-        elif (inst == 'd'):
-            # deletion - go down
-            arr[top][t] = target[i]
+        elif (i == 0):
+            arr[top][t] = "_"
+            arr[bot][t] = source[j-1]
+            j = j - 1
+        elif (inst == 'i'):
+            # insertion
+            arr[top][t] = target[i-1]
             arr[bot][t] = "_"
+            i = i - 1
+            
+        elif (inst == 'd'):
+            # deletion
+            arr[top][t] = "_"
+            arr[bot][t] = source[j-1]
             j = j - 1
         else:
-            # substitution - go diagonal
-            arr[top][t] = target[i]
-            arr[bot][t] = source[j]
+            # substitution
+            arr[top][t] = target[i-1]
+            arr[bot][t] = source[j-1]
+            if (target[i-1] == source[j-1]): 
+                arr[mid][t] = '|'
             j = j - 1
             i = i - 1
         t = t -1
-        
-    print(arr[top])
-    print(arr[mid])
-    print(arr[bot])   
+        count = count + 1
+    return arr, count
 
-    
-    
+def printAlignment(arr, count):
+    for i in range(len(arr[0])):
+        if (arr[0][i] != ' '):
+            print(' ' + arr[0][i], end='')
+    print()
+
+    for i in range(len(arr[1]) - count, len(arr[1])):
+        print(' ' + arr[1][i], end='')
+    print()
+
+    for i in range(len(arr[2])):
+        if (arr[2][i] != ' '):
+            print(' ' + arr[2][i], end='')
 
 if __name__=="__main__":
     from sys import argv
     if len(argv) > 2:
-        print("levenshtein distance =", distance(argv[1], argv[2], 1, 1, 2))  
-        
-            
+        distance, alignment, count = distance(argv[1], argv[2], 1, 1, 2)
+        print("levenshtein distance =", distance)  
+        printAlignment(alignment, count)
