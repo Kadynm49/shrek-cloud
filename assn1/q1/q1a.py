@@ -1,3 +1,7 @@
+# Kadyn Marshall and Zephren de la Cerda
+# CSCI assn1 q1a
+# 4/25/2020
+
 import re
 import unicodedata
 from contractions import CONTRACTION_MAP

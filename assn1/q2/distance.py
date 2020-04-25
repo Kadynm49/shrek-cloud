@@ -1,3 +1,7 @@
+# Kadyn Marshall and Zephren de la Cerda
+# CSCI assn1 q2
+# 4/25/2020
+
 def distance(target, source, insertcost, deletecost, replacecost):
     n = len(target)+1
     m = len(source)+1

@@ -1,4 +1,4 @@
-For the first question, we chose to do part A and the script we used was Shrek. Our first step was to clean 
+For the first question, we chose to do part A and the script we used was the movie xShrek. Our first step was to clean 
 out the text by removing symbols, grammar, and stopping words, and changing conjugations to a simplified form.
 Then we grabbed all the words for the character "donkey" and used the wordcloud library to make the cloud in 
 the shape and colors of our given image. No extra resources/methods used.
