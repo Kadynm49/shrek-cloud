@@ -1,0 +1,8 @@
+For q2, we modified the given distance function to track the instruction used for each cell
+so that we could later use that information when visualizing the alignment. We created a visualize
+function that the distance function calls, and it returns a array with the characters needed for the
+alignment. The visualize function back-traces through the edit distance table and the instruction 
+table, while adding information to the alignment array that corresponds to each instruction for the 
+current cell. The only other function we created was printAlignment, which takes in an array containing
+the characters of the alignment and prints them out in an aligned fashion. We did not use any additional 
+resources for q2.
