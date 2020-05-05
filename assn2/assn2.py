@@ -45,7 +45,8 @@ word_list['count'] = np.where(word_list['words'] == '<s' , 0,
 word_list['prob'] = word_list['count']/sum(word_list['count'])
 print(word_list.head().to_string())
 
-
+##next time:
+##report size, add unknown tkn, bigram/unigram models
 
 
 end_time = time.time()  
