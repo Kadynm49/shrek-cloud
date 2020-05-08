@@ -20,7 +20,9 @@ start_time = time.time()
 # and <UNK> replacing words with a frequency lower than 3
 with open("data/cleanedTrain.txt", "r") as file:
     for line in file:
-        sentences.append(start + line[:-1] + end)
+        # sentences.append(start + line[:-1] + end)
+        sentences.append(line[:-1])
+        
 
 text_list = " ".join(map(str, sentences))
 
@@ -71,48 +73,38 @@ for trigram in smoothed_trigrams:
     unsmoothed_trigrams[trigram] /= trigram_count
 
 
-print(unsmoothed_bigrams[('includes', 'charge')])
-print(smoothed_bigrams[('includes', 'charge')])
-
 # Generate Sentences using unigram model
-for i in range(10):
-    sentence_length = random.randrange(10, 20)
-    unigrams = unsmoothed_unigrams.most_common(sentence_length)
-    sentence = ""
-    for j in range(sentence_length):
-        sentence += str(unigrams[j][0][0]) + " "
-    print(sentence)
+print("Unsmoothed Unigram Sentences:\n")
+# for i in range(10):
+#     sentence_length = random.randrange(10, 20)
+#     unigrams = unsmoothed_unigrams.most_common(sentence_length)
+#     sentence = "<s> "
+#     for j in range(sentence_length):
+#         if (str(unigrams[j][0][0]) != "<s>" and str(unigrams[j][0][0]) != "</s>"):
+#             sentence += str(unigrams[j][0][0]) + " "
+#     sentence += " </s>"
+#     print(sentence)
 
-# text = train_data['sentence_clean']
-# text_list = " ".join(map(str, text))
-# text_list[0:100]
-
-# word_list = pd.DataFrame({'words':text.str.split(' ', expand = True).stack().unique()})   
-
-# word_count_table = pd.DataFrame()
-# for n,word in enumerate(word_list['words']):
-#     # Create a list of just the word we are interested in, we use regular expressions so that part of words do not count
-#     # e.g. 'ear' would be counted in each appearance of the word 'year'
-#     word_count = len(re.findall(' ' + word + ' ', text_list))  
-#     word_count_table = word_count_table.append(pd.DataFrame({'count':word_count}, index=[n]))
+# print("\nSmoothed Unigram Sentences:")
+# for i in range(10):
+#     sentence_length = random.randrange(10, 20)
+#     unigrams = smoothed_unigrams.most_common(sentence_length)
+#     sentence = "<s> "
+#     for j in range(sentence_length):
+#         if (str(unigrams[j][0][0]) != "<s>" and str(unigrams[j][0][0]) != "</s>"):
+#             sentence += str(unigrams[j][0][0]) + " "
+#     sentence += " </s>"
+    # print(sentence)
     
-#     clear_output(wait=False)
-#     print('Proportion of words completed:', np.round(n/len(word_list),4)*100,'%')
+    
+# Generate Sentences using Bigram model
 
-# word_list['count'] = word_count_table['count']
-# # Remove the count for the start and end of sentence notation so 
-# # that these do not inflate the other probabilities
-# word_list['count'] = np.where(word_list['words'] == '<s' , 0,
-#                      np.where(word_list['words'] == '/s>', 0,
-#                      word_list['count']))
-
-
-# word_list['prob'] = word_list['count']/sum(word_list['count'])
-# print(word_list.head().to_string())
-
-# ##next time:
-# ##report size, add unknown tkn, bigram/unigram models
-
-
-# end_time = time.time()  
-# print('Total run time = ', np.round(end_time-start_time,2)/60, ' minutes')
+# Create a list of sentence starts for unsmoothed bigrams
+sentence_starters = []
+for bigram in unsmoothed_bigrams:
+    if(bigram[0] == "<s>"):
+        sentence_starters.append(bigram[1])
+print(sentence_starters)
+# for i in range(10):
+    
+            
