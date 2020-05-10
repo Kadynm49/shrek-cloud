@@ -1,0 +1,11 @@
+Kadyn Marshall
+Zephren de la Cerda
+Assignment 2 
+
+We used the second strategy described in step to and replaced all words in the train.txt that had an occurence of 3 or fewer with <UNK>.
+We moved the modified text into a new file called cleanedTrain.txt in order to lower the amount of time the program takes to read in train.txt 
+and insert all of the <UNK> tokens. This means that cleanedTrain.txt is required for the program to run correctly, and the original train.txt 
+file is no longer used. Make sure that cleanedTrain.txt and test.txt are in the same directory as assn2.py and it will run correctly
+
+For generating sentences, we added some randomness to ensure that sentences don't often duplicate. Unigrams have a random length of each sentence, 
+while bigram and trigram models choose the next word from the 5 most likely words to come after the current word.

@@ -1,14 +1,14 @@
 # import pandas as pd
 import string
 import time
-# import numpy as np
+import numpy as np
 import re
 import nltk
 from nltk.util import ngrams
 from collections import Counter
 import copy
 import random
-from math import log, exp
+from math import log, log2, exp
 # from IPython.display import clear_output
 
 start = " <s> "
@@ -19,7 +19,7 @@ word_frequencies = {}
 start_time = time.time()
 # cleanedTrain.txt is a modified version of train.txt to have sentence markers 
 # and <UNK> replacing words with a frequency lower than 3
-with open("data/cleanedTrain.txt", "r") as file:
+with open("cleanedTrain.txt", "r") as file:
     for line in file:
         # sentences.append(start + line[:-1] + end)
         sentences.append(line[:-1])
@@ -73,7 +73,6 @@ for trigram in smoothed_trigrams:
     smoothed_trigrams[trigram] /= trigram_count
     unsmoothed_trigrams[trigram] /= trigram_count
 
-
 # Generate Sentences using unsmoothed unigram model
 print("Unsmoothed Unigram Sentences:")
 for i in range(10):
@@ -125,15 +124,22 @@ for i in range(10):
         sentence += current_word[0] + " "
         if (current_word[1] != 0):
             sentence_p += log(current_word[1])
-        next_word = { "prob" : 0, "word": "" }
+        next_word = {"prob": 0}
+        next_word_candidates = []
 
         # Find most likely word to come after current word
         for bigram in unsmoothed_bigrams:
-            # Set most likely word if this bigram has the highest probability found so far (25% chance it will not set)
-            if bigram[0] == current_word[0] and unsmoothed_bigrams[bigram] > next_word["prob"] and random.randrange(1, 5) == 1:
+            # Set most likely word if this bigram has the highest probability found so far 
+            if bigram[0] == current_word[0] and unsmoothed_bigrams[bigram] > next_word["prob"]:
                 next_word["prob"] = unsmoothed_bigrams[bigram]
-                next_word["word"] = bigram[1]
+                next_word_candidates.append({"prob": unsmoothed_bigrams[bigram], "word": bigram[1]})
 
+        # Sort candidates by probability and choose from top 5
+        next_word_candidates = sorted(next_word_candidates, key = lambda i: i['prob']) 
+        if (len(next_word_candidates) >= 5):
+            next_word = next_word_candidates[random.randrange(0, 5)]
+        else:
+            next_word = next_word_candidates[random.randrange(0, len(next_word_candidates))]
         current_word = (next_word["word"], next_word["prob"])
         word_count += 1
     sentence += "</s>"
@@ -141,7 +147,7 @@ for i in range(10):
     print("Sentence Probability (Log Space): ", sentence_p, "\n")
     
 
-# Create a list of sentence starts for smoothed bigrams
+# Create a list of sentence starters for smoothed bigrams
 sentence_starters = []
 for bigram in smoothed_bigrams.most_common():
     if bigram[0][0] == "<s>":
@@ -163,22 +169,29 @@ for i in range(10):
         sentence += current_word[0] + " "
         if (current_word[1] != 0):
             sentence_p += log(current_word[1])
-        next_word = { "prob" : 0, "word": "" }
+        next_word = {"prob": 0}
+        next_word_candidates = []
 
         # Find most likely word to come after current word
         for bigram in smoothed_bigrams:
-            # Set most likely word if this bigram has the highest probability found so far (25% chance it will not set)
-            if bigram[0] == current_word[0] and smoothed_bigrams[bigram] > next_word["prob"] and random.randrange(1, 5) > 1:
+            # Set most likely word if this bigram has the highest probability found so far 
+            if bigram[0] == current_word[0] and smoothed_bigrams[bigram] > next_word["prob"]:
                 next_word["prob"] = smoothed_bigrams[bigram]
-                next_word["word"] = bigram[1]
+                next_word_candidates.append({"prob": smoothed_bigrams[bigram], "word": bigram[1]})
 
+        # Sort candidates by probability and choose from top 5
+        next_word_candidates = sorted(next_word_candidates, key = lambda i: i['prob'])
+        if (len(next_word_candidates) >= 5):
+            next_word = next_word_candidates[random.randrange(0, 5)]
+        else:
+            next_word = next_word_candidates[random.randrange(0, len(next_word_candidates))] 
         current_word = (next_word["word"], next_word["prob"])
         word_count += 1
     sentence += "</s>"
     print(sentence)
     print("Sentence Probability (Log Space): ", sentence_p, "\n")
 
-#Trigram Model
+# Create a list of sentence starters for unsmoothed trigrams
 sentence_starters = []
 for trigram in unsmoothed_trigrams.most_common():
     if trigram[0][0] == "<s>":
@@ -186,6 +199,8 @@ for trigram in unsmoothed_trigrams.most_common():
     if len(sentence_starters) == 30:
         break
     
+# Generate sentences using unsmoothed trigram model
+print("\nUnsmoothed Trigram Sentences:")
 for i in range(10):
     current_word = sentence_starters[random.randrange(0,20)]
     current_word = (("<s>", "<s>", current_word[0][1]), current_word[1])
@@ -202,17 +217,170 @@ for i in range(10):
         next_word_candidates = []
         # Find most likely word to come after current word
         for trigram in unsmoothed_trigrams:
-            # Set most likely word if this trigram has the highest probatrility found so far (25% chance it will not set)
-            # print(trigram)
-            if trigram[1] == current_word[0][2] and trigram[0] == current_word[0][1] and unsmoothed_trigrams[trigram] > next_word["prob"] and len(next_word_candidates) <= 5:
+            # Set most likely word if this trigram has the highest probability found so far
+            if trigram[1] == current_word[0][2] and trigram[0] == current_word[0][1] and unsmoothed_trigrams[trigram] > next_word["prob"]:
+                next_word["prob"] = unsmoothed_trigrams[trigram]
                 next_word_candidates.append({"prob": unsmoothed_trigrams[trigram], "word":trigram})
 
-        next_word = next_word_candidates[random.randrange(len(next_word_candidates))]
+        next_word_candidates = sorted(next_word_candidates, key = lambda i: i['prob']) 
+        if (len(next_word_candidates) >= 5):
+            next_word = next_word_candidates[random.randrange(0, 5)]
+        else:
+            next_word = next_word_candidates[random.randrange(0, len(next_word_candidates))]        
         current_word = (next_word["word"], next_word["prob"])
-        # print(current_word)
 
         word_count += 1
     sentence += "</s>"
     print(sentence)
     print("Sentence Probability (Log Space): ", sentence_p, "\n")
+
+
+# Create a list of sentence starters for smoothed trigrams
+sentence_starters = []
+for trigram in smoothed_trigrams.most_common():
+    if trigram[0][0] == "<s>":
+        sentence_starters.append((trigram[0], trigram[1]))
+    if len(sentence_starters) == 30:
+        break
     
+# Generate sentences using smoothed trigram model
+print("\nSmoothed Trigram Sentences:")
+for i in range(10):
+    current_word = sentence_starters[random.randrange(0,20)]
+    current_word = (("<s>", "<s>", current_word[0][1]), current_word[1])
+    sentence = "<s> "
+    word_count = 0
+    sentence_p = 0
+    while current_word[0][2] != "</s>":
+        if word_count == 20:
+            break
+
+        sentence += current_word[0][2] + " "
+        sentence_p += log(current_word[1])
+        next_word = { "prob" : 0, "word": "" }
+        next_word_candidates = []
+        # Find most likely word to come after current word
+        for trigram in smoothed_trigrams:
+            # Set most likely word if this trigram has the highest probability found so far
+            if trigram[1] == current_word[0][2] and trigram[0] == current_word[0][1] and smoothed_trigrams[trigram] > next_word["prob"]:
+                next_word["prob"] = smoothed_trigrams[trigram]
+                next_word_candidates.append({"prob": smoothed_trigrams[trigram], "word":trigram})
+
+        next_word_candidates = sorted(next_word_candidates, key = lambda i: i['prob']) 
+        if (len(next_word_candidates) >= 5):
+            next_word = next_word_candidates[random.randrange(0, 5)]
+        else:
+            next_word = next_word_candidates[random.randrange(0, len(next_word_candidates))]        
+        current_word = (next_word["word"], next_word["prob"])
+
+        word_count += 1
+    sentence += "</s>"
+    print(sentence)
+    print("Sentence Probability (Log Space): ", sentence_p, "\n")
+
+# Calculate perplexity of test set with n-gram models
+test_sentences = []
+test_word_count = 0
+with open("test.txt", "r") as file:
+    for line in file:
+        test_sentences.append(start + line + end)
+
+text_list = " ".join(map(str, test_sentences))
+word_list = text_list.split()
+
+for word in word_list:
+    test_word_count += 1
+
+# Calculate perplexity using unsmoothed unigram model
+perplexity = 0
+unknown_prob = unsmoothed_unigrams[("<UNK>",)]
+for word in word_list:
+    word_prob = unsmoothed_unigrams[(word,)]
+    if word_prob == 0:
+        word_prob = unknown_prob
+
+    perplexity += log2(word_prob)
+
+perplexity = 2 ** ((-1*(1/test_word_count)) * perplexity)
+print("Unsmoothed Unigram Model Perplexity:", perplexity)
+
+# Calculate perplexity using smoothed unigram model
+perplexity = 0
+unknown_prob = smoothed_unigrams[("<UNK>",)]
+for word in word_list:
+    word_prob = smoothed_unigrams[(word,)]
+    if word_prob == 0:
+        word_prob = unknown_prob
+
+    perplexity += log2(word_prob)
+
+perplexity = 2 ** ((-1*(1/test_word_count)) * perplexity)
+print("Smoothed Unigram Model Perplexity:", perplexity)
+
+# Calculate perplexity using unsmoothed bigram model
+perplexity = 0
+previous_word = "<s>"
+for word in word_list:
+    word_prob = unsmoothed_bigrams[(previous_word, word)]
+    if word_prob == 0:
+        word_prob = unsmoothed_bigrams[(previous_word, "<UNK>")]
+        word = "<UNK>"
+
+    if word_prob != 0:
+        perplexity += log2(word_prob)
+    previous_word = word
+
+perplexity = 2 ** ((-1*(1/test_word_count)) * perplexity)
+print("Unsmoothed Bigram Model Perplexity:", perplexity)
+
+# Calculate perplexity using smoothed bigram model
+perplexity = 0
+previous_word = "<s>"
+for word in word_list:
+    word_prob = smoothed_bigrams[(previous_word, word)]
+    if word_prob == 0:
+        word_prob = smoothed_bigrams[(previous_word, "<UNK>")]
+        word = "<UNK>"
+
+    if word_prob != 0:
+        perplexity += log2(word_prob)
+    previous_word = word
+
+perplexity = 2 ** ((-1*(1/test_word_count)) * perplexity)
+print("Smoothed Bigram Model Perplexity:", perplexity)
+
+# Calculate perplexity using unsmoothed trigram model
+perplexity = 0
+previous_word = "<s>"
+previous_previous_word = "<s>"
+for word in word_list:
+    word_prob = unsmoothed_trigrams[(previous_previous_word, previous_word, word)]
+    if word_prob == 0:
+        word_prob = unsmoothed_trigrams[(previous_previous_word, previous_word, "<UNK>")]
+        word = "<UNK>"
+
+    if word_prob != 0:
+        perplexity += log2(word_prob)
+    previous_word = word
+    previous_previous_word = previous_word
+
+perplexity = 2 ** ((-1*(1/test_word_count)) * perplexity)
+print("Unsmoothed Trigram Model Perplexity:", perplexity)
+
+# Calculate perplexity using unsmoothed trigram model
+perplexity = 0
+previous_word = "<s>"
+previous_previous_word = "<s>"
+for word in word_list:
+    word_prob = smoothed_trigrams[(previous_previous_word, previous_word, word)]
+    if word_prob == 0:
+        word_prob = smoothed_trigrams[(previous_previous_word, previous_word, "<UNK>")]
+        word = "<UNK>"
+
+    if word_prob != 0:
+        perplexity += log2(word_prob)
+    previous_word = word
+    previous_previous_word = previous_word
+
+perplexity = 2 ** ((-1*(1/test_word_count)) * perplexity)
+print("Smoothed Trigram Model Perplexity:", perplexity)
