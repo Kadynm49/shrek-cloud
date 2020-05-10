@@ -9,3 +9,14 @@ file is no longer used. Make sure that cleanedTrain.txt and test.txt are in the 
 
 For generating sentences, we added some randomness to ensure that sentences don't often duplicate. Unigrams have a random length of each sentence, 
 while bigram and trigram models choose the next word from the 5 most likely words to come after the current word.
+
+For our perplexities, all of them were calculated in log space. 
+
+For smoothed/unsmoothed unigrams, we had a setence probability range from 0 to 5.
+
+For smoothed/unsmoothed bigrams, we had a sentence probability range from -13 to -80.
+
+For smoothed/unsmoothed trigrams, we had a sentence probability range from -38 to -250.
+
+
+
