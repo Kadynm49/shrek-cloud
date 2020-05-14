@@ -23,20 +23,23 @@ for tuple in vocab_frequencies:
     vocab_frequencies_dict[tuple[0]] = tuple[1]
     vocab_total_word_frequency += tuple[1]
 
-non_spam_word_frequencies = {}
+nonspam_word_frequencies = {}
 spam_word_frequencies = {}
-non_spam_word_probabilities = {}
+nonspam_word_probabilities = {}
 spam_word_probabilities = {}
+spam_total_word_frequency = 0
+nonspam_total_word_frequency = 0
 
 # Get frequencies for all non spam words that appear in vocab
 for filename in os.listdir('data/nonspam-train'):
     for line in open('data/nonspam-train/' + filename):
         for token in line.split():
             if (token in vocab_frequencies_dict):
-                if (token in non_spam_word_frequencies):
-                    non_spam_word_frequencies[token] += 1
+                if (token in nonspam_word_frequencies):
+                    nonspam_word_frequencies[token] += 1
                 else: 
-                    non_spam_word_frequencies[token] = 1
+                    nonspam_word_frequencies[token] = 1
+                nonspam_total_word_frequency += 1
 
 # Get frequencies for all non spam words that appear in vocab
 for filename in os.listdir('data/spam-train'):
@@ -47,23 +50,30 @@ for filename in os.listdir('data/spam-train'):
                     spam_word_frequencies[token] += 1
                 else: 
                     spam_word_frequencies[token] = 1
+                spam_total_word_frequency += 1
+
+# Add frequencies of 0 for the words that are in vocabulary but not in spam/nonspam documents
+for word in vocab_frequencies_dict:
+    if word not in nonspam_word_frequencies:
+        nonspam_word_frequencies[word] = 0
+    if word not in spam_word_frequencies:
+        spam_word_frequencies[word] = 0
 
 # Convert frequencies to probabilities in log space
-for frequency in non_spam_word_frequencies:
-    non_spam_word_probabilities[frequency] = log(non_spam_word_frequencies[frequency]/vocab_total_word_frequency)
+for frequency in nonspam_word_frequencies:
+    nonspam_word_probabilities[frequency] = log((1 + nonspam_word_frequencies[frequency])/(nonspam_total_word_frequency + vocab_total_word_frequency))
 
 for frequency in spam_word_frequencies:
-    spam_word_probabilities[frequency] = log(spam_word_frequencies[frequency]/vocab_total_word_frequency)    
+    spam_word_probabilities[frequency] = log((1 + spam_word_frequencies[frequency])/(spam_total_word_frequency + vocab_total_word_frequency))    
 
-with open('nonspam-word-probabilites.json', 'w') as file:
-    file.write(json.dumps(non_spam_word_probabilities))
+with open('nonspam-word-probabilities.json', 'w') as file:
+    file.write(json.dumps(nonspam_word_probabilities))
     file.close()
 
-with open('spam-word-probabilites.json', 'w') as file:
+with open('spam-word-probabilities.json', 'w') as file:
     file.write(json.dumps(spam_word_probabilities))
     file.close()
 
-# with open('vocab-frequency.json', 'w') as file:
-#     file.write(json.dumps(vocab_frequencies_dict))
-#     file.close()
-
+with open('vocab.json', 'w') as file:
+    file.write(json.dumps(list(vocab_frequencies_dict.keys())))
+    file.close()
