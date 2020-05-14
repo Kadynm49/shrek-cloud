@@ -1,0 +1,16 @@
+Assignment 3 Report
+CSCI 404
+Kadyn Marshall and Zephren de la Cerda
+
+We divided up our solution into two programs, assn3-train.py and assn3-test.py. The assn3-train.py program creates the naive bayes classifier by examining
+all of the training documents for both spam and nonspam emails. The vocabulary is limited to the 2500 most common words in the entire training set of 
+documents, and two dictionaries are created to store the probabilities of each word occurring given a spam or nonspam document. These probabilities implement
+Laplace smoothing and are stored in log space. Once these dictionaries are created, along with the list of vocabulary words, these data structures are stored
+in a separate JSON file: nonspam-word-probabilities.json, spam-word-probabilities.json, and vocab.json.
+
+The other program, assn3-test.py can then be run, and it loads up the dictionaries and list from the json files, then begins to classify each test document.
+A true positive is considered to be the case when the classifier correctly classifies a document as spam, a true negative is when it correctly classifies
+a document as nonspam, and the false positive and false negatives are when the classifier incorrectly classifies a document as spam or nonspam respectively.
+The calculations for precision and recall are made following the formulas given in the lecture slides.
+
+P.S. It is assumed that the data folder is in the same directory as assn3-train.py and assn3-test.py.

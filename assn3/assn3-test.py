@@ -2,6 +2,9 @@ from math import exp
 import json
 import os
 
+# Add all log probabilites of each word by eachother for each document 
+# for both spam and nonspam, then classify that document spam or nonspam
+# based on which has the higher probability
 def classify(folder, vocab, nonspam_word_probabilites, spam_word_probabilities): 
     false_positives = 0
     true_positives = 0
@@ -31,6 +34,8 @@ def classify(folder, vocab, nonspam_word_probabilites, spam_word_probabilities):
     
     return false_positives, true_positives, false_negatives, true_negatives
 
+# Load classifier data from json files and call classify on spam and nonspam test documents 
+# to get number of fp's, fn's, tp's, tn's and print results 
 if __name__ == '__main__':
     nonspam_word_probabilites = json.loads(open('nonspam-word-probabilities.json').read())
     spam_word_probabilities = json.loads(open('spam-word-probabilities.json').read())
