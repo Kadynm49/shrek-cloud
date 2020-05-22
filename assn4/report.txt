@@ -1,0 +1,3 @@
+Zephren de la Cerda and Kadyn Marshall
+In our attempt to beat the baseline accuracy, we tried to classify the test data using the emission probabilities, transition probabilities, and the 
+viterbi algorithm. We also attempted to smooth the probabilities, but ultimately this did not help out our accuracy.
