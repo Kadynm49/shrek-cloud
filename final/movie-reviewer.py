@@ -1,5 +1,5 @@
 # Get movie from user
-print("What movie do you want reviewed?")
+print("What movie or TV show do you want reviewed?")
 title = input()
 
 import requests
@@ -30,7 +30,12 @@ def main():
         print("The movie you entered is not in IMDB")
         exit()
     responseJson = json.loads(response.text)
-    imdbID = responseJson["imdbID"]
+    imdbID = ""
+    if "imdbID" in responseJson:
+        imdbID = responseJson["imdbID"]
+    else: 
+        print("Invalid title, please try a different movie or show.")
+        exit()
 
     # Get imdb user reviews page
     URL = 'https://www.imdb.com/title/' + imdbID + '/reviews/'
@@ -57,7 +62,7 @@ def main():
     # those reviews to the list. Stop when there is no 
     # longer a "Load More" button
     reviews = []
-    print ("Fetching all IMDB reviews\n")
+    print ("Fetching reviews from IMDB\n")
     while (load_more_button != None):
         review_containers = soup.find_all("div", class_="show-more__control")
         for review_container in review_containers:
@@ -92,7 +97,7 @@ def main():
     # processed_inputs_string  = tokenize_words(reviews_string)
     # create_review_with_tensorflow(processed_inputs, avg_score)
 
-    create_review_with_markov_chains(reviews_string.split(), avg_review_len, avg_score)
+    create_review_with_markov_chains(reviews_string.split(), avg_review_len, avg_score, title)
     
     # Uncomment for n grams review
     # create_review_with_n_grams(reviews_string)
@@ -105,7 +110,7 @@ def make_pairs(corpus):
         yield (corpus[i], corpus[i+1])
 
 # Source: https://towardsdatascience.com/simulating-text-with-markov-chains-in-python-1a27e6d13fc6
-def create_review_with_markov_chains(corpus, review_len, rating):
+def create_review_with_markov_chains(corpus, review_len, rating, title):
     import numpy as np
             
     pairs = make_pairs(corpus)
@@ -136,7 +141,7 @@ def create_review_with_markov_chains(corpus, review_len, rating):
 
     review = ' '.join(chain)
 
-    print("I rate this movie a %.1f/10" % rating)
+    print("I rate " + title + " %.1f/10\n" % rating)
     print(review)
 
 ##########################################
