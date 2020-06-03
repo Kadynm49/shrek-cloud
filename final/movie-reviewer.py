@@ -1,103 +1,127 @@
-# Get movie from user
-print("What movie or TV show do you want reviewed?")
-title = input()
-
 import requests
 import sys
 import json
 from bs4 import BeautifulSoup
 from bs4 import NavigableString
 import numpy as np
+
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.util import ngrams
-
-
 from nltk.corpus import reuters
 from nltk import bigrams, trigrams
 from collections import Counter, defaultdict
 import random
 
+trueeeeeeee = True
+
 def main(): 
-    # Find imdb title key for this movie using the omdb API
-    omdb_key = "a542cac9"
-    link = "http://www.omdbapi.com/?apikey=" + omdb_key
-    t = "&t=" + title
-    response = requests.get(link + t)
-    if response.status_code != 200:
-        print("The movie you entered is not in IMDB")
-        exit()
-    responseJson = json.loads(response.text)
-    imdbID = ""
-    if "imdbID" in responseJson:
-        imdbID = responseJson["imdbID"]
-    else: 
-        print("Invalid title, please try a different movie or show.")
-        exit()
+    while (trueeeeeeee):
+        # Get movie from user
+        print("What movie or TV show do you want reviewed?")
+        title = input()
 
-    # Get imdb user reviews page
-    URL = 'https://www.imdb.com/title/' + imdbID + '/reviews/'
-    load_more_url = 'https://www.imdb.com/title/' + imdbID + '/reviews/_ajax?paginationKey='
-    r = requests.get(url = URL)
-    soup = BeautifulSoup(r.text, 'html.parser')
+        # Find imdb title key for this movie using the omdb API
+        omdb_key = "a542cac9"
+        link = "http://www.omdbapi.com/?apikey=" + omdb_key
+        t = "&t=" + title
+        response = requests.get(link + t)
+        if response.status_code != 200:
+            print("The movie you entered is not in IMDB")
+            exit()
+        responseJson = json.loads(response.text)
+        imdbID = ""
+        if "imdbID" in responseJson:
+            imdbID = responseJson["imdbID"]
+        else: 
+            print("Invalid title, please try a different movie or show.")
+            exit()
 
-    # Remove br tags
-    for e in soup.findAll('br'):
-        e.extract()
+        # Get review type from user
+        print("Enter the type of review would you like to generate: 'p' - positive, 'n' - negative, 'a' - average")
+        review_type = input()
+        
+        # Get desired models from user
+        print("Enter the models would you like to run to generate the reviews: 1 - Trigram, 2 - Markov Chain, 3 - Neural Network")
+        models = input().split(" ")
+        
+        # Get imdb user reviews page
+        URL = 'https://www.imdb.com/title/' + imdbID + '/reviews/'
+        load_more_url = 'https://www.imdb.com/title/' + imdbID + '/reviews/_ajax?paginationKey='
+        r = requests.get(url = URL)
+        soup = BeautifulSoup(r.text, 'html.parser')
 
-    # Find load more button
-    load_more_button = soup.find(class_ = "load-more-data")
-    avg_score = 0
+        # Remove br tags
+        for e in soup.findAll('br'):
+            e.extract()
 
-    for scale in soup.find_all(class_ = "point-scale"):
-        score = scale.find_previous_sibling("span")
-        avg_score += int(score.contents[0])
-
-    # Get reviews by loading all pages of user reviews
-    # IMDB uses a "Load More" button to retrieve 25 
-    # reviews at a time, so we must find the paginationKey 
-    # for each page to get the next 25 reviews and append 
-    # those reviews to the list. Stop when there is no 
-    # longer a "Load More" button
-    reviews = []
-    print ("\n==================================\nFetching reviews from IMDB\n==================================")
-    while (load_more_button != None):
-        review_containers = soup.find_all("div", class_="show-more__control")
-        for review_container in review_containers:
-            if len(review_container.contents) > 0 and type(review_container.contents[0]) == NavigableString:
-                review = review_container.contents[0]
-                if len(review) > 1:
-                    reviews.append(review)
+        # Find load more button
+        load_more_button = soup.find(class_ = "load-more-data")
+        avg_score = 0
 
         for scale in soup.find_all(class_ = "point-scale"):
             score = scale.find_previous_sibling("span")
             avg_score += int(score.contents[0])
 
-        URL = load_more_url + load_more_button['data-key']
-        r = requests.get(url = URL)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        for e in soup.findAll('br'):
-            e.extract()
-        load_more_button = soup.find(class_="load-more-data")
+        # Get reviews by loading all pages of user reviews
+        # IMDB uses a "Load More" button to retrieve 25 
+        # reviews at a time, so we must find the paginationKey 
+        # for each page to get the next 25 reviews and append 
+        # those reviews to the list. Stop when there is no 
+        # longer a "Load More" button
 
-    avg_score /= len(reviews)
-    
-    # Calculate average review length
-    avg_review_len = 0
-    for review in reviews:
-        avg_review_len += len(review.split())
-    avg_review_len //= len(reviews)
+        ## TODO - seperate different reviews (negative vs positive)
 
-    # All reviews in one string
-    reviews_string = " ".join(reviews)
 
-    print("I rate " + title + " %.1f/10\n" % avg_score)
+        reviews = []
+        print ("\n==================================\nFetching reviews from IMDB\n==================================")
+        while (load_more_button != None):
+            review_containers = soup.find_all("div", class_="show-more__control")
+            for review_container in review_containers:
+                if len(review_container.contents) > 0 and type(review_container.contents[0]) == NavigableString:
+                    review = review_container.contents[0]
+                    if len(review) > 1:
+                        reviews.append(review)
 
-    create_review_with_markov_chains(reviews_string.split(), avg_review_len, title)
+            for scale in soup.find_all(class_ = "point-scale"):
+                score = scale.find_previous_sibling("span")
+                avg_score += int(score.contents[0])
 
-    # create_review_with_tensorflow(reviews)
+            URL = load_more_url + load_more_button['data-key']
+            r = requests.get(url = URL)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            for e in soup.findAll('br'):
+                e.extract()
+            load_more_button = soup.find(class_="load-more-data")
 
-    create_review_with_n_grams(reviews_string.split())
+        avg_score /= len(reviews)
+        
+        # Calculate average review length
+        avg_review_len = 0
+        for review in reviews:
+            avg_review_len += len(review.split())
+        avg_review_len //= len(reviews)
+
+        # All reviews in one string
+        reviews_string = " ".join(reviews)
+
+        print("I rate " + title + " %.1f/10\n" % avg_score)
+
+        for model in models:
+            if (model == '1'):
+                create_review_with_n_grams(reviews_string.split())
+            elif (model == '2'):
+                create_review_with_markov_chains(reviews_string.split(), avg_review_len, title)
+            elif (model == '3'):
+                create_review_with_tensorflow(reviews)
+
+        print("\n")
+        print("Review another movie or exit?")
+        if (input() == "exit"):
+            exit()  
+
+
+
 
 ##########################################
 # Markov chain generated text source 
