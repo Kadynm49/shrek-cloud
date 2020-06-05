@@ -51,7 +51,7 @@ def main():
         r = requests.get(url = URL)
         soup = BeautifulSoup(r.text, "html.parser")
 
-        # Remove br, ul, ol, li tags
+        # Remove br, ul, ol, li, a tags
         for e in soup.find_all("br"):
             e.extract()
         for e in soup.find_all("ul"):
@@ -60,6 +60,9 @@ def main():
             e.extract()
         for e in soup.find_all("li"):
             e.extract()
+        for e in soup.find_all("a"):
+            e.extract()
+
 
         # Find load more button
         load_more_button = soup.find(class_ = "load-more-data")
@@ -106,13 +109,14 @@ def main():
                     if type(content) == Tag \
                         and content["class"][0] == "content" \
                         and len(content.contents) > 0 \
-                        and type(content.contents[1].contents[0]) == NavigableString:
+                        and len(content.contents[1].contents) > 0 \
+                        and type(content.contents[1].contents[0]) == NavigableString: # failed on this line for Avengers: Endgame
                         
                         review = None
                         if len(content.contents[1].contents) == 1:
                             review = content.contents[1].contents[0]
                         else:
-                            review = " ".join(content.contents[1].contents)
+                            review = " ".join(content.contents[1].contents) 
                         
                         if (score is not None and score >= 5):
                             positive_reviews.append(review)
@@ -140,6 +144,8 @@ def main():
             for e in soup.find_all("ol"):
                 e.extract()
             for e in soup.find_all("li"):
+                e.extract()
+            for e in soup.find_all("a"):
                 e.extract()
 
             # Find next load more button
@@ -304,8 +310,8 @@ def walk_graph(graph, distance=5, start_node=None):
     choices = list(graph[start_node].keys())
     chosen_word = np.random.choice(choices, None, p=weights)
     
-    if distance <= 0 and chosen_word[-1] != ".":
-        return []
+    if distance <= 0 and chosen_word[-1] == ".":
+        return [chosen_word]
     
     return [chosen_word] + walk_graph(graph, distance=distance-1, start_node=chosen_word)
 
@@ -374,7 +380,6 @@ def create_review_with_trigrams(corpus, review_len, title, avg_score):
 # Neural network text generation 
 # https://github.com/minimaxir/textgenrnn
 def create_review_with_tensorflow(reviews, title, avg_score):
-    print("\n==================================\nGenerating review with a neural network\n")
     from textgenrnn import textgenrnn
     textgen = textgenrnn()
     print("I rate " + title + " %.1f/10\n" % avg_score)
