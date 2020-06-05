@@ -194,18 +194,18 @@ def main():
                 for review_type in review_types:
                     if review_type == "a":
                         print("==================================\nGenerating average review with markov model algorithm 1\n")
-                        create_review_with_markov_chains(reviews_string.split(), avg_review_len, title, avg_score)
-                        print("algorithm 2:")
+                        # create_review_with_markov_chains(reviews_string.split(), avg_review_len, title, avg_score)
+                        # print("algorithm 2:")
                         create_review_with_markov_chains_2(reviews_string.split(), avg_review_len, title, avg_score)
                     elif review_type == "p":
                         print("==================================\nGenerating positive review with markov model algorithm 1\n")
-                        create_review_with_markov_chains(positive_reviews_string.split(), avg_positive_review_len, title, avg_positive_score)
-                        print("algorithm 2:")
+                        # create_review_with_markov_chains(positive_reviews_string.split(), avg_positive_review_len, title, avg_positive_score)
+                        # print("algorithm 2:")
                         create_review_with_markov_chains_2(positive_reviews_string.split(), avg_positive_review_len, title, avg_positive_score)
                     elif review_type == "n":
                         print("==================================\nGenerating negative review with markov model algorithm 1\n")
-                        create_review_with_markov_chains(negative_reviews_string.split(), avg_negative_review_len, title, avg_negative_score)
-                        print("algorithm 2:")
+                        # create_review_with_markov_chains(negative_reviews_string.split(), avg_negative_review_len, title, avg_negative_score)
+                        # print("algorithm 2:")
                         create_review_with_markov_chains_2(negative_reviews_string.split(), avg_negative_review_len, title, avg_negative_score)
                     else:
                         print(review_type, "is not a valid option for review type.")
@@ -229,8 +229,6 @@ def main():
         print("Review another movie or exit?")
         if (input() == "exit"):
             exit()  
-
-
 
 
 ##########################################
