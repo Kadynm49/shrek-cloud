@@ -13,10 +13,8 @@ from nltk import bigrams, trigrams
 from collections import Counter, defaultdict
 import random
 
-trueeeeeeee = True
-
 def main(): 
-    while (trueeeeeeee):
+    while (True):
         # Get movie from user
         print("What movie or TV show do you want reviewed?")
         title = input()
