@@ -12,6 +12,7 @@ from nltk.corpus import reuters
 from nltk import bigrams, trigrams
 from collections import Counter, defaultdict
 import random
+this pr is for testing purposes
 
 def main(): 
     while (True):
